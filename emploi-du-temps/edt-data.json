@@ -1,0 +1,47 @@
+{
+  "_comment": "Source unique de verite : ce fichier alimente a la fois le .tex et le .pdf (script generer_edt.py). Modifier ici puis relancer le script.",
+  "etablissement": "Collège d'Enseignement Général (CEG) de Tokoin",
+  "localite": "Lomé, Togo",
+  "classe": "3e B",
+  "intitule": "Classe de troisième (préparation au BEPC)",
+  "annee": "2026 – 2027",
+  "periode": "Trimestre 1",
+  "prof_principal": "Mme K. ADJOVON",
+  "chef_etablissement": "Le Chef d'établissement",
+  "duree_seance_min": 50,
+  "jours": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"],
+  "creneaux": [
+    { "id": "1", "libelle": "1re", "debut": "07h30", "fin": "08h20" },
+    { "id": "2", "libelle": "2e", "debut": "08h20", "fin": "09h10" },
+    { "id": "RECRE", "libelle": "Récréation", "debut": "09h10", "fin": "09h30" },
+    { "id": "3", "libelle": "3e", "debut": "09h30", "fin": "10h20" },
+    { "id": "4", "libelle": "4e", "debut": "10h20", "fin": "11h10" },
+    { "id": "5", "libelle": "5e", "debut": "11h10", "fin": "12h00" },
+    { "id": "6", "libelle": "6e", "debut": "12h00", "fin": "12h50" }
+  ],
+  "vacants": {
+    "_comment": "Cases sans cours (samedi matin raccourci)",
+    "Samedi": ["5", "6"]
+  },
+  "matieres": {
+    "Français":                 { "couleur": "#F7C9C9", "prof": "Mme K. ADJOVON",   "salle": "Salle 3" },
+    "Mathématiques":            { "couleur": "#C6DCF7", "prof": "M. Y. AMOUZOU",    "salle": "Salle 5" },
+    "Anglais":                  { "couleur": "#CBE8CF", "prof": "Mme S. LAWSON",    "salle": "Labo de langues" },
+    "Physique-Chimie":          { "couleur": "#FBE2B7", "prof": "M. T. GBENOU",     "salle": "Labo PC 1" },
+    "SVT":                      { "couleur": "#CFE9E2", "prof": "Mme A. HOUEDANOU", "salle": "Salle sciences" },
+    "Histoire-Géographie":      { "couleur": "#DCD2EE", "prof": "M. D. KPATCHA",    "salle": "Salle 2" },
+    "EPS":                      { "couleur": "#F9CFE3", "prof": "M. E. DOSSA",      "salle": "Terrain de sport" },
+    "ECM":                      { "couleur": "#FFF0B8", "prof": "M. M. SABI",       "salle": "Salle 3" },
+    "Arts plastiques":          { "couleur": "#D6E2F5", "prof": "Mme F. AKAKPO",    "salle": "Salle d'arts" },
+    "Technologie & Info.":      { "couleur": "#E2E2E2", "prof": "M. J. AGBESSI",    "salle": "Salle informatique" },
+    "Études dirigées":          { "couleur": "#F2F2F2", "prof": "Mme K. ADJOVON",   "salle": "CDI" }
+  },
+  "grille": {
+    "Lundi":    { "1": "Français",            "2": "Mathématiques",       "3": "Anglais",        "4": "Physique-Chimie", "5": "Histoire-Géographie", "6": "Études dirigées" },
+    "Mardi":    { "1": "Mathématiques",       "2": "SVT",                 "3": "Français",       "4": "Anglais",         "5": "EPS",                 "6": "Études dirigées" },
+    "Mercredi": { "1": "Histoire-Géographie", "2": "Français",            "3": "Mathématiques",  "4": "SVT",             "5": "Physique-Chimie",     "6": "Arts plastiques" },
+    "Jeudi":    { "1": "Anglais",             "2": "Physique-Chimie",     "3": "Français",       "4": "Mathématiques",   "5": "ECM",                 "6": "Technologie & Info." },
+    "Vendredi": { "1": "SVT",                 "2": "Mathématiques",       "3": "Histoire-Géographie", "4": "Français",   "5": "EPS",                 "6": "Études dirigées" },
+    "Samedi":   { "1": "Français",            "2": "Anglais",             "3": "EPS",            "4": "Mathématiques" }
+  }
+}
