@@ -1,10 +1,9 @@
 % =====================================================================
-%  EMPLOI DU TEMPS — Collège d'Enseignement Général (CEG) de Tokoin
-%  Classe de troisième (préparation au BEPC) — 2026 – 2027
+%  EMPLOI DU TEMPS — FAMILLE TAYELEKA — 2026 – 2027
 %
 %  Compilation : pdflatex emploi-du-temps.tex  (ou Overleaf / XeLaTeX)
-%  Fichier généré depuis edt-data.py — ne pas éditer à la main,
-%  modifier edt-data.json puis relancer :  python3 generer_edt.py
+%  Fichier généré depuis edt-data.json — ne pas éditer à la main :
+%  modifier edt-data.json puis relancer  python3 generer_edt.py
 % =====================================================================
 
 \documentclass[a4paper,landscape,10pt]{article}
@@ -14,52 +13,35 @@
 \usepackage[french]{babel}
 \usepackage[margin=1.2cm]{geometry}
 \usepackage[table]{xcolor}   % \cellcolor / \rowcolor
-\usepackage{array}           % colonnes p{} paramétrées
+\usepackage{array}           % colonnes p{} de largeur fixe
 
 % ---------- Palette ----------
 \definecolor{entete}{RGB}{41,64,95}
 \definecolor{horaire}{RGB}{234,239,246}
-\definecolor{recre}{RGB}{214,214,214}
-\definecolor{vide}{RGB}{247,247,247}
+\definecolor{libre}{RGB}{255,255,255}
 \definecolor{grille}{RGB}{154,165,180}
 \definecolor{note}{RGB}{91,102,117}
-\definecolor{cFrancais}{RGB}{247,201,201}   % Français
 \definecolor{cMathematiques}{RGB}{198,220,247}   % Mathématiques
-\definecolor{cAnglais}{RGB}{203,232,207}   % Anglais
-\definecolor{cPhysiqueChimie}{RGB}{251,226,183}   % Physique-Chimie
-\definecolor{cSVT}{RGB}{207,233,226}   % SVT
-\definecolor{cHistoireGeographie}{RGB}{220,210,238}   % Histoire-Géographie
-\definecolor{cEPS}{RGB}{249,207,227}   % EPS
-\definecolor{cECM}{RGB}{255,240,184}   % ECM
-\definecolor{cArtsplastiques}{RGB}{214,226,245}   % Arts plastiques
-\definecolor{cTechnologieInfo}{RGB}{226,226,226}   % Technologie & Info.
-\definecolor{cEtudesdirigees}{RGB}{242,242,242}   % Études dirigées
 
 % ---------- Commandes ----------
-% \cours{couleur}{matière}{enseignant}{salle}
-\newcommand{\cours}[4]{%
+% case occupée : \cours{couleur}{texte}
+\newcommand{\cours}[2]{%
   \cellcolor{#1}%
-  \begin{minipage}[c][1.25cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
-    \centering
-    {\small\textbf{#2}}\par\vspace{2pt}
-    {\footnotesize #3}\par\vspace{1pt}
-    {\scriptsize #4}%
+  \begin{minipage}[c][0.88cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
+    \centering\small\textbf{#2}%
   \end{minipage}}
 
-% \horaire{libellé}{début -- fin}
-\newcommand{\horaire}[2]{%
+% case libre : même hauteur, aucun contenu
+\newcommand{\libre}{%
+  \cellcolor{libre}%
+  \begin{minipage}[c][0.88cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
+  \end{minipage}}
+
+% \horaire{plage horaire}
+\newcommand{\horaire}[1]{%
   \cellcolor{horaire}%
-  \begin{minipage}[c][1.25cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
-    \centering
-    {\textbf{#1}}\par\vspace{2pt}
-    {\footnotesize #2}%
-  \end{minipage}}
-
-% case sans cours
-\newcommand{\vide}{%
-  \cellcolor{vide}%
-  \begin{minipage}[c][1.25cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
-    \centering\footnotesize\itshape sans cours%
+  \begin{minipage}[c][0.88cm][c]{\dimexpr\linewidth-2\tabcolsep\relax}%
+    \centering\textbf{#1}%
   \end{minipage}}
 
 % \legende{couleur}{libellé}
@@ -67,63 +49,79 @@
   \colorbox{#1}{\rule[-1.5pt]{0pt}{10pt}\hspace{1.1cm}}~{\footnotesize #2}}
 
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.15}
+\renewcommand{\arraystretch}{1.0}
 \pagestyle{empty}
 
 \begin{document}
 
 % ---------- Bandeau ----------
 \noindent\colorbox{entete}{%
-  \parbox[c][1.75cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
+  \parbox[c][1.40cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
     \centering\color{white}%
-    {\Large\textbf{EMPLOI DU TEMPS — 3E B}}\\[3pt]
-    {\normalsize Collège d'Enseignement Général (CEG) de Tokoin — Lomé, Togo}\\[3pt]
-    {\small Classe de troisième (préparation au BEPC) \quad\textbullet\quad Année scolaire 2026 – 2027 \quad\textbullet\quad Trimestre 1 \quad\textbullet\quad Professeur principal : Mme K. ADJOVON}
+    {\Large\textbf{EMPLOI DU TEMPS — FAMILLE TAYELEKA}}\\[3pt]
+    {\normalsize Répétitions scolaires et activités de la semaine}\\[3pt]
+    {\small Lomé, Togo \quad\textbullet\quad 2026 – 2027}
   }%
 }
 \vspace{6pt}
 
-% ---------- Grille hebdomadaire ----------
+% ---------- Grille de la semaine ----------
 \noindent
-\begin{tabular}{|p{2.4cm}|*{6}{p{3.85cm}|}}
+\begin{tabular}{|p{2.0cm}|*{6}{p{3.90cm}|}}
 \hline
 \rowcolor{entete}\cellcolor{entete}\textcolor{white}{\textbf{Horaire}} & \textcolor{white}{\textbf{Lundi}} & \textcolor{white}{\textbf{Mardi}} & \textcolor{white}{\textbf{Mercredi}} & \textcolor{white}{\textbf{Jeudi}} & \textcolor{white}{\textbf{Vendredi}} & \textcolor{white}{\textbf{Samedi}} \\
 \hline
-\horaire{1re}{07h30 – 08h20} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} & \cours{cHistoireGeographie}{Histoire-Géographie}{M. D. KPATCHA}{Salle 2} & \cours{cAnglais}{Anglais}{Mme S. LAWSON}{Labo de langues} & \cours{cSVT}{SVT}{Mme A. HOUEDANOU}{Salle sciences} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} \\
+\horaire{7-8h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\horaire{2e}{08h20 – 09h10} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} & \cours{cSVT}{SVT}{Mme A. HOUEDANOU}{Salle sciences} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} & \cours{cPhysiqueChimie}{Physique-Chimie}{M. T. GBENOU}{Labo PC 1} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} & \cours{cAnglais}{Anglais}{Mme S. LAWSON}{Labo de langues} \\
+\horaire{8-9h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\multicolumn{7}{|c|}{\cellcolor{recre}\textbf{Récréation — 09h10 à 09h30}} \\
+\horaire{9-10h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\horaire{3e}{09h30 – 10h20} & \cours{cAnglais}{Anglais}{Mme S. LAWSON}{Labo de langues} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} & \cours{cHistoireGeographie}{Histoire-Géographie}{M. D. KPATCHA}{Salle 2} & \cours{cEPS}{EPS}{M. E. DOSSA}{Terrain de sport} \\
+\horaire{10-11h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\horaire{4e}{10h20 – 11h10} & \cours{cPhysiqueChimie}{Physique-Chimie}{M. T. GBENOU}{Labo PC 1} & \cours{cAnglais}{Anglais}{Mme S. LAWSON}{Labo de langues} & \cours{cSVT}{SVT}{Mme A. HOUEDANOU}{Salle sciences} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} & \cours{cFrancais}{Français}{Mme K. ADJOVON}{Salle 3} & \cours{cMathematiques}{Mathématiques}{M. Y. AMOUZOU}{Salle 5} \\
+\horaire{11-12h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\horaire{5e}{11h10 – 12h00} & \cours{cHistoireGeographie}{Histoire-Géographie}{M. D. KPATCHA}{Salle 2} & \cours{cEPS}{EPS}{M. E. DOSSA}{Terrain de sport} & \cours{cPhysiqueChimie}{Physique-Chimie}{M. T. GBENOU}{Labo PC 1} & \cours{cECM}{ECM}{M. M. SABI}{Salle 3} & \cours{cEPS}{EPS}{M. E. DOSSA}{Terrain de sport} & \vide \\
+\horaire{12-13h} & \libre & \libre & \libre & \libre & \libre & \libre \\
 \hline
-\horaire{6e}{12h00 – 12h50} & \cours{cEtudesdirigees}{Études dirigées}{Mme K. ADJOVON}{CDI} & \cours{cEtudesdirigees}{Études dirigées}{Mme K. ADJOVON}{CDI} & \cours{cArtsplastiques}{Arts plastiques}{Mme F. AKAKPO}{Salle d'arts} & \cours{cTechnologieInfo}{Technologie \& Info.}{M. J. AGBESSI}{Salle informatique} & \cours{cEtudesdirigees}{Études dirigées}{Mme K. ADJOVON}{CDI} & \vide \\
+\horaire{13-14h} & \libre & \libre & \libre & \libre & \libre & \libre \\
+\hline
+\horaire{14-15h} & \libre & \libre & \libre & \libre & \libre & \libre \\
+\hline
+\horaire{15-16h} & \libre & \libre & \libre & \libre & \libre & \libre \\
+\hline
+\horaire{16-17h} & \libre & \libre & \libre & \libre & \libre & \libre \\
+\hline
+\horaire{17-19h} & \libre & \libre & \cours{cMathematiques}{Répétition de Math} & \libre & \cours{cMathematiques}{Math} & \libre \\
+\hline
+\end{tabular}
+
+\vspace{5pt}
+\noindent\textbf{Légende :}
+\vspace{3pt}
+
+\noindent
+\legende{cMathematiques}{Mathématiques} \quad \legende{libre}{Créneau libre}
+
+\vspace{8pt}
+\noindent\textbf{Répétiteurs :}
+\vspace{3pt}
+
+\noindent
+\begin{tabular}{|p{6.0cm}|p{4.5cm}|p{12.0cm}|}
+\hline
+\rowcolor{entete}\textcolor{white}{\textbf{Nom et prénom}} & \textcolor{white}{\textbf{Matière}} & \textcolor{white}{\textbf{Jours et horaires}} \\
+\hline
+Mr KODJONE Kodjo & Mathématiques & Mercredi 17-19h — Vendredi 17-19h \\[6pt]
+\hline
+ &  &  \\[6pt]
+\hline
+ &  &  \\[6pt]
 \hline
 \end{tabular}
 
 \vspace{6pt}
-\noindent\textbf{Légende des matières} (volume horaire hebdomadaire entre parenthèses) :
-\vspace{3pt}
-
-\begin{center}
-\legende{cFrancais}{Français (5 h 00)}\quad \legende{cMathematiques}{Mathématiques (5 h 00)}\quad \legende{cAnglais}{Anglais (3 h 20)}\quad \legende{cPhysiqueChimie}{Physique-Chimie (2 h 30)}\\[5pt]\legende{cSVT}{SVT (2 h 30)}\quad \legende{cHistoireGeographie}{Histoire-Géographie (2 h 30)}\quad \legende{cEPS}{EPS (2 h 30)}\quad \legende{cECM}{ECM (0 h 50)}\\[5pt]\legende{cArtsplastiques}{Arts plastiques (0 h 50)}\quad \legende{cTechnologieInfo}{Technologie \& Info. (0 h 50)}\quad \legende{cEtudesdirigees}{Études dirigées (2 h 30)}
-\end{center}
-
-\vspace{8pt}
 \noindent\textcolor{note}{\footnotesize
-Volume horaire hebdomadaire : 34 séances de 50 min, soit \textbf{28 h 20}. Les cours s'achèvent le samedi à 11h10. Toute modification doit être signalée au secrétariat.
+Les créneaux non renseignés sont libres. Les autres répétiteurs seront ajoutés ici dès que leurs horaires seront connus.
 }
-
-\vspace{10pt}
-\noindent
-\begin{tabular}{@{}p{0.30\linewidth}p{0.30\linewidth}p{0.30\linewidth}@{}}
-\textbf{Le Professeur principal} & \textbf{Le Chef d'établissement} & \textbf{Visa du CPE} \\[14pt]
-Mme K. ADJOVON &  &  \\\[8pt]
-\rule{4.5cm}{0.4pt} & \rule{4.5cm}{0.4pt} & \rule{4.5cm}{0.4pt} \\
-\end{tabular}
 
 \end{document}

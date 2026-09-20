@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Génère l'emploi du temps à partir d'une source unique : edt-data.json
+Génère l'emploi du temps de la Famille TAYELEKA depuis une source unique :
+edt-data.json
 
 Sorties :
   * emploi-du-temps.tex  -> code LaTeX (compile avec pdflatex / xelatex / Overleaf)
@@ -28,22 +29,33 @@ DATA_FILE = HERE / "edt-data.json"
 TEX_FILE = HERE / "emploi-du-temps.tex"
 PDF_FILE = HERE / "emploi-du-temps.pdf"
 
-# --------------------------------------------------------------------------- #
-# Utilitaires
-# --------------------------------------------------------------------------- #
+# Réglages de mise en page (cm) — cohérents entre le .tex et le .pdf
+HAUTEUR_LIGNE = 0.88      # hauteur d'une ligne de la grille
+HAUTEUR_ENTETE = 0.75     # ligne « Horaire / Lundi / Mardi … »
+LARGEUR_HORAIRE = 2.00    # colonne des horaires
 
 PALETTE = {
     "entete": "#29405F",     # bandeau + ligne d'en-tête du tableau
     "horaire": "#EAEFF6",    # colonne des horaires
-    "recre": "#D6D6D6",      # ligne récréation
-    "vide": "#F7F7F7",       # cases sans cours
+    "libre": "#FFFFFF",      # cases libres
     "grille": "#9AA5B4",     # filets du tableau
     "note": "#5B6675",       # texte des notes de bas de page
 }
 
 
+# --------------------------------------------------------------------------- #
+# Utilitaires
+# --------------------------------------------------------------------------- #
+
+def nettoyer(donnees: dict) -> dict:
+    """Ignore les clés documentaires (_comment) du JSON."""
+    if isinstance(donnees, dict):
+        return {k: nettoyer(v) for k, v in donnees.items() if not k.startswith("_")}
+    return donnees
+
+
 def slug(texte: str) -> str:
-    """Nom de couleur LaTeX ASCII stable (Français -> Francais)."""
+    """Nom de couleur LaTeX ASCII stable (Mathématiques -> Mathematiques)."""
     ascii_texte = unicodedata.normalize("NFKD", texte).encode("ascii", "ignore").decode()
     return re.sub(r"[^A-Za-z0-9]", "", ascii_texte) or "couleur"
 
@@ -72,36 +84,12 @@ def echappement_tex(texte: str) -> str:
 
 
 def echappement_html(texte: str) -> str:
-    return (
-        texte.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    )
+    return texte.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-
-def format_duree(minutes: int) -> str:
-    """300 -> '5 h 00'"""
-    heures, reste = divmod(minutes, 60)
-    return f"{heures} h {reste:02d}"
-
-
-# --------------------------------------------------------------------------- #
-# Chargement et calculs
-# --------------------------------------------------------------------------- #
 
 def charger() -> dict:
     with DATA_FILE.open(encoding="utf-8") as handle:
-        donnees = json.load(handle)
-    donnees["matieres"] = {k: v for k, v in donnees["matieres"].items() if not k.startswith("_")}
-    donnees["vacants"] = {k: v for k, v in donnees.get("vacants", {}).items() if not k.startswith("_")}
-    return donnees
-
-
-def volume_horaire(donnees: dict) -> dict[str, int]:
-    """Nombre de séances par matière (les cases vides ne comptent pas)."""
-    compte: dict[str, int] = {}
-    for ligne in donnees["grille"].values():
-        for matiere in ligne.values():
-            compte[matiere] = compte.get(matiere, 0) + 1
-    return compte
+        return nettoyer(json.load(handle))
 
 
 # --------------------------------------------------------------------------- #
@@ -109,25 +97,22 @@ def volume_horaire(donnees: dict) -> dict[str, int]:
 # --------------------------------------------------------------------------- #
 
 def construire_tex(donnees: dict) -> str:
-    duree = donnees["duree_seance_min"]
     jours = donnees["jours"]
-    creneaux = [c for c in donnees["creneaux"] if not c["id"].startswith("_")]
+    creneaux = donnees["creneaux"]
     matieres = donnees["matieres"]
-    vacants = donnees["vacants"]
-    compte = volume_horaire(donnees)
-    total_seances = sum(compte.values())
+    grille = donnees["grille"]
+    repetiteurs = donnees["repetiteurs"]
 
     L: list[str] = []
     a = L.append
 
     # --- préambule -------------------------------------------------------- #
     a("% =====================================================================")
-    a("%  EMPLOI DU TEMPS — " + donnees["etablissement"])
-    a("%  " + donnees["intitule"] + " — " + donnees["annee"])
+    a(f"%  EMPLOI DU TEMPS — {donnees['famille'].upper()} — {donnees['annee']}")
     a("%")
     a("%  Compilation : pdflatex emploi-du-temps.tex  (ou Overleaf / XeLaTeX)")
-    a("%  Fichier généré depuis edt-data.py — ne pas éditer à la main,")
-    a("%  modifier edt-data.json puis relancer :  python3 generer_edt.py")
+    a("%  Fichier généré depuis edt-data.json — ne pas éditer à la main :")
+    a("%  modifier edt-data.json puis relancer  python3 generer_edt.py")
     a("% =====================================================================")
     a("")
     a("\\documentclass[a4paper,landscape,10pt]{article}")
@@ -137,8 +122,7 @@ def construire_tex(donnees: dict) -> str:
     a("\\usepackage[french]{babel}")
     a("\\usepackage[margin=1.2cm]{geometry}")
     a("\\usepackage[table]{xcolor}   % \\cellcolor / \\rowcolor")
-    a("\\usepackage{array}           % colonnes p{} paramétrées")
-    
+    a("\\usepackage{array}           % colonnes p{} de largeur fixe")
     a("")
 
     # --- couleurs --------------------------------------------------------- #
@@ -151,32 +135,26 @@ def construire_tex(donnees: dict) -> str:
         a(f"\\definecolor{{c{slug(matiere)}}}{{RGB}}{{{r},{v},{b}}}   % {matiere}")
     a("")
 
-    # --- commandes du document -------------------------------------------- #
+    # --- commandes -------------------------------------------------------- #
     a("% ---------- Commandes ----------")
-    a("% \\cours{couleur}{matière}{enseignant}{salle}")
-    a("\\newcommand{\\cours}[4]{%")
+    a("% case occupée : \\cours{couleur}{texte}")
+    a("\\newcommand{\\cours}[2]{%")
     a("  \\cellcolor{#1}%")
-    a("  \\begin{minipage}[c][1.25cm][c]{\\dimexpr\\linewidth-2\\tabcolsep\\relax}%")
-    a("    \\centering")
-    a("    {\\small\\textbf{#2}}\\par\\vspace{2pt}")
-    a("    {\\footnotesize #3}\\par\\vspace{1pt}")
-    a("    {\\scriptsize #4}%")
+    a(f"  \\begin{{minipage}}[c][{HAUTEUR_LIGNE}cm][c]{{\\dimexpr\\linewidth-2\\tabcolsep\\relax}}%")
+    a("    \\centering\\small\\textbf{#2}%")
     a("  \\end{minipage}}")
     a("")
-    a("% \\horaire{libellé}{début -- fin}")
-    a("\\newcommand{\\horaire}[2]{%")
+    a("% case libre : même hauteur, aucun contenu")
+    a("\\newcommand{\\libre}{%")
+    a("  \\cellcolor{libre}%")
+    a(f"  \\begin{{minipage}}[c][{HAUTEUR_LIGNE}cm][c]{{\\dimexpr\\linewidth-2\\tabcolsep\\relax}}%")
+    a("  \\end{minipage}}")
+    a("")
+    a("% \\horaire{plage horaire}")
+    a("\\newcommand{\\horaire}[1]{%")
     a("  \\cellcolor{horaire}%")
-    a("  \\begin{minipage}[c][1.25cm][c]{\\dimexpr\\linewidth-2\\tabcolsep\\relax}%")
-    a("    \\centering")
-    a("    {\\textbf{#1}}\\par\\vspace{2pt}")
-    a("    {\\footnotesize #2}%")
-    a("  \\end{minipage}}")
-    a("")
-    a("% case sans cours")
-    a("\\newcommand{\\vide}{%")
-    a("  \\cellcolor{vide}%")
-    a("  \\begin{minipage}[c][1.25cm][c]{\\dimexpr\\linewidth-2\\tabcolsep\\relax}%")
-    a("    \\centering\\footnotesize\\itshape sans cours%")
+    a(f"  \\begin{{minipage}}[c][{HAUTEUR_LIGNE}cm][c]{{\\dimexpr\\linewidth-2\\tabcolsep\\relax}}%")
+    a("    \\centering\\textbf{#1}%")
     a("  \\end{minipage}}")
     a("")
     a("% \\legende{couleur}{libellé}")
@@ -184,7 +162,7 @@ def construire_tex(donnees: dict) -> str:
     a("  \\colorbox{#1}{\\rule[-1.5pt]{0pt}{10pt}\\hspace{1.1cm}}~{\\footnotesize #2}}")
     a("")
     a("\\setlength{\\tabcolsep}{3pt}")
-    a("\\renewcommand{\\arraystretch}{1.15}")
+    a("\\renewcommand{\\arraystretch}{1.0}")
     a("\\pagestyle{empty}")
     a("")
 
@@ -193,51 +171,41 @@ def construire_tex(donnees: dict) -> str:
     a("")
     a("% ---------- Bandeau ----------")
     a("\\noindent\\colorbox{entete}{%")
-    a("  \\parbox[c][1.75cm][c]{\\dimexpr\\linewidth-2\\fboxsep\\relax}{%")
+    a("  \\parbox[c][1.40cm][c]{\\dimexpr\\linewidth-2\\fboxsep\\relax}{%")
     a("    \\centering\\color{white}%")
-    a("    {\\Large\\textbf{EMPLOI DU TEMPS — " + echappement_tex(donnees["classe"].upper()) + "}}\\\\[3pt]")
-    a("    {\\normalsize " + echappement_tex(donnees["etablissement"]) + " — " + echappement_tex(donnees["localite"]) + "}\\\\[3pt]")
-    a("    {\\small " + echappement_tex(donnees["intitule"]) + " \\quad\\textbullet\\quad Année scolaire "
-      + echappement_tex(donnees["annee"]) + " \\quad\\textbullet\\quad " + echappement_tex(donnees["periode"])
-      + " \\quad\\textbullet\\quad Professeur principal : " + echappement_tex(donnees["prof_principal"]) + "}")
+    a("    {\\Large\\textbf{" + echappement_tex(donnees["titre"]) + " — "
+      + echappement_tex(donnees["famille"].upper()) + "}}\\\\[3pt]")
+    a("    {\\normalsize " + echappement_tex(donnees["mention"]) + "}\\\\[3pt]")
+    a("    {\\small " + echappement_tex(donnees["localite"])
+      + " \\quad\\textbullet\\quad " + echappement_tex(donnees["annee"]) + "}")
     a("  }%")
     a("}")
     a("\\vspace{6pt}")
     a("")
 
-    # --- grand tableau ---------------------------------------------------- #
-    a("% ---------- Grille hebdomadaire ----------")
+    # --- grille ----------------------------------------------------------- #
+    nb_jours = len(jours)
+    largeur_jour = (25.4 - LARGEUR_HORAIRE) / nb_jours
+    a("% ---------- Grille de la semaine ----------")
     a("\\noindent")
-    a("\\begin{tabular}{|p{2.4cm}|*{"
-      + str(len(jours)) + "}{p{3.85cm}|}}")
+    a("\\begin{tabular}{|p{" + f"{LARGEUR_HORAIRE}cm" + "}|*{" + str(nb_jours)
+      + "}{p{" + f"{largeur_jour:.2f}cm" + "}|}}")
     a("\\hline")
 
     entete = ["\\textcolor{white}{\\textbf{" + echappement_tex(j) + "}}" for j in jours]
-    a("\\rowcolor{entete}\\cellcolor{entete}\\textcolor{white}{\\textbf{Horaire}} & " + " & ".join(entete) + " \\\\")
+    a("\\rowcolor{entete}\\cellcolor{entete}\\textcolor{white}{\\textbf{Horaire}} & "
+      + " & ".join(entete) + " \\\\")
     a("\\hline")
 
     for creneau in creneaux:
-        if creneau["id"] == "RECRE":
-            a("\\multicolumn{" + str(len(jours) + 1) + "}{|c|}{\\cellcolor{recre}\\textbf{"
-              + echappement_tex(creneau["libelle"]) + " — "
-              + echappement_tex(creneau["debut"]) + " à " + echappement_tex(creneau["fin"]) + "}} \\\\")
-            a("\\hline")
-            continue
-
-        cellules = [
-            "\\horaire{" + echappement_tex(creneau["libelle"]) + "}{"
-            + echappement_tex(creneau["debut"]) + " – " + echappement_tex(creneau["fin"]) + "}"
-        ]
+        cellules = ["\\horaire{" + echappement_tex(creneau["libelle"]) + "}"]
         for jour in jours:
-            if creneau["id"] in vacants.get(jour, []):
-                cellules.append("\\vide")
-                continue
-            matiere = donnees["grille"][jour][creneau["id"]]
-            infos = matieres[matiere]
-            cellules.append("\\cours{c" + slug(matiere) + "}{"
-                            + echappement_tex(matiere) + "}{"
-                            + echappement_tex(infos["prof"]) + "}{"
-                            + echappement_tex(infos["salle"]) + "}")
+            case = grille.get(jour, {}).get(creneau["id"])
+            if case:
+                matiere = case["matiere"]
+                cellules.append("\\cours{c" + slug(matiere) + "}{" + echappement_tex(case["texte"]) + "}")
+            else:
+                cellules.append("\\libre")
         a(" & ".join(cellules) + " \\\\")
         a("\\hline")
 
@@ -245,37 +213,40 @@ def construire_tex(donnees: dict) -> str:
     a("")
 
     # --- légende ---------------------------------------------------------- #
-    a("\\vspace{6pt}")
-    a("\\noindent\\textbf{Légende des matières} (volume horaire hebdomadaire entre parenthèses) :")
+    a("\\vspace{5pt}")
+    a("\\noindent\\textbf{Légende :}")
     a("\\vspace{3pt}")
     a("")
-    a("\\begin{center}")
-    legendes = [
-        "\\legende{c" + slug(matiere) + "}{" + echappement_tex(matiere)
-        + " (" + format_duree(compte.get(matiere, 0) * duree) + ")}"
-        for matiere in matieres
-    ]
-    a("\\\\[5pt]".join(["\\quad ".join(legendes[i : i + 4]) for i in range(0, len(legendes), 4)]))
-    a("\\end{center}")
-    a("")
-
-    # --- notes ------------------------------------------------------------ #
-    a("\\vspace{8pt}")
-    a("\\noindent\\textcolor{note}{\\footnotesize")
-    a("Volume horaire hebdomadaire : " + str(total_seances) + " séances de " + str(duree)
-      + " min, soit \\textbf{" + format_duree(total_seances * duree) + "}. "
-      "Les cours s'achèvent le samedi à 11h10. Toute modification doit être signalée au secrétariat.")
-    a("}")
-    a("")
-
-    # --- signatures ------------------------------------------------------- #
-    a("\\vspace{10pt}")
     a("\\noindent")
-    a("\\begin{tabular}{@{}p{0.30\\linewidth}p{0.30\\linewidth}p{0.30\\linewidth}@{}}")
-    a("\\textbf{Le Professeur principal} & \\textbf{Le Chef d'établissement} & \\textbf{Visa du CPE} \\\\[14pt]")
-    a(echappement_tex(donnees["prof_principal"]) + " &  &  \\\\\\[8pt]")
-    a("\\rule{4.5cm}{0.4pt} & \\rule{4.5cm}{0.4pt} & \\rule{4.5cm}{0.4pt} \\\\")
+    legendes = ["\\legende{c" + slug(m) + "}{" + echappement_tex(m) + "}" for m in matieres]
+    legendes.append("\\legende{libre}{Créneau libre}")
+    a(" \\quad ".join(legendes))
+    a("")
+
+    # --- répétiteurs ------------------------------------------------------ #
+    a("\\vspace{8pt}")
+    a("\\noindent\\textbf{Répétiteurs :}")
+    a("\\vspace{3pt}")
+    a("")
+    a("\\noindent")
+    a("\\begin{tabular}{|p{6.0cm}|p{4.5cm}|p{12.0cm}|}")
+    a("\\hline")
+    a("\\rowcolor{entete}\\textcolor{white}{\\textbf{Nom et prénom}} & "
+      "\\textcolor{white}{\\textbf{Matière}} & "
+      "\\textcolor{white}{\\textbf{Jours et horaires}} \\\\")
+    a("\\hline")
+    for repetiteur in repetiteurs:
+        a(echappement_tex(repetiteur["nom"]) + " & " + echappement_tex(repetiteur["matiere"])
+          + " & " + echappement_tex(repetiteur["horaires"]) + " \\\\[6pt]")
+        a("\\hline")
     a("\\end{tabular}")
+    a("")
+
+    # --- note ------------------------------------------------------------- #
+    a("\\vspace{6pt}")
+    a("\\noindent\\textcolor{note}{\\footnotesize")
+    a(echappement_tex(donnees["note"]))
+    a("}")
     a("")
     a("\\end{document}")
 
@@ -298,13 +269,11 @@ def construire_pdf(donnees: dict) -> None:
         print("  ! reportlab n'est pas installé : PDF non généré (pip install reportlab)")
         return
 
-    duree = donnees["duree_seance_min"]
     jours = donnees["jours"]
-    creneaux = [c for c in donnees["creneaux"] if not c["id"].startswith("_")]
+    creneaux = donnees["creneaux"]
     matieres = donnees["matieres"]
-    vacants = donnees["vacants"]
-    compte = volume_horaire(donnees)
-    total_seances = sum(compte.values())
+    grille = donnees["grille"]
+    repetiteurs = donnees["repetiteurs"]
 
     page_w, page_h = landscape(A4)
     marge = 1.2 * cm
@@ -314,8 +283,8 @@ def construire_pdf(donnees: dict) -> None:
         str(PDF_FILE),
         pagesize=landscape(A4),
         leftMargin=marge, rightMargin=marge, topMargin=marge, bottomMargin=marge,
-        title=f"Emploi du temps {donnees['classe']} — {donnees['annee']}",
-        author=donnees["etablissement"],
+        title=f"Emploi du temps — {donnees['famille']}",
+        author=donnees["famille"],
         subject="Emploi du temps hebdomadaire — TogoEdu Hub",
     )
 
@@ -323,39 +292,35 @@ def construire_pdf(donnees: dict) -> None:
     grille_c = colors.HexColor(PALETTE["grille"])
     note_c = colors.HexColor(PALETTE["note"])
 
-    style_bandeau = ParagraphStyle("bandeau", fontName="Helvetica-Bold", fontSize=13,
-                                   leading=16, alignment=TA_CENTER, textColor=colors.white)
-    style_bandeau2 = ParagraphStyle("bandeau2", fontName="Helvetica", fontSize=9.5,
-                                    leading=12, alignment=TA_CENTER, textColor=colors.white)
-    style_jour = ParagraphStyle("jour", fontName="Helvetica-Bold", fontSize=9,
-                                leading=11, alignment=TA_CENTER, textColor=colors.white)
-    style_heure = ParagraphStyle("heure", fontName="Helvetica-Bold", fontSize=8,
-                                 leading=10, alignment=TA_CENTER)
-    style_heure2 = ParagraphStyle("heure2", fontName="Helvetica", fontSize=7,
-                                  leading=9, alignment=TA_CENTER)
-    style_cours = ParagraphStyle("cours", fontName="Helvetica-Bold", fontSize=8,
-                                 leading=10, alignment=TA_CENTER)
-    style_prof = ParagraphStyle("prof", fontName="Helvetica", fontSize=6.8,
-                                leading=8.5, alignment=TA_CENTER)
-    style_legende = ParagraphStyle("legende", fontName="Helvetica", fontSize=7.5, leading=10)
-    style_note = ParagraphStyle("note", fontName="Helvetica", fontSize=7.5, leading=10, textColor=note_c)
-    style_sign = ParagraphStyle("sign", fontName="Helvetica", fontSize=8, leading=11)
+    s_titre = ParagraphStyle("titre", fontName="Helvetica-Bold", fontSize=14, leading=17,
+                             alignment=TA_CENTER, textColor=colors.white)
+    s_sous = ParagraphStyle("sous", fontName="Helvetica", fontSize=9.5, leading=12,
+                            alignment=TA_CENTER, textColor=colors.white)
+    s_jour = ParagraphStyle("jour", fontName="Helvetica-Bold", fontSize=9, leading=11,
+                            alignment=TA_CENTER, textColor=colors.white)
+    s_heure = ParagraphStyle("heure", fontName="Helvetica-Bold", fontSize=8.5, leading=11,
+                             alignment=TA_CENTER)
+    s_cours = ParagraphStyle("cours", fontName="Helvetica-Bold", fontSize=8.5, leading=11,
+                             alignment=TA_CENTER)
+    s_legende = ParagraphStyle("legende", fontName="Helvetica", fontSize=7.5, leading=10)
+    s_note = ParagraphStyle("note", fontName="Helvetica", fontSize=7.5, leading=10, textColor=note_c)
+    s_cellule = ParagraphStyle("cellule", fontName="Helvetica", fontSize=8, leading=10)
+    s_titre_bloc = ParagraphStyle("titrebloc", fontName="Helvetica-Bold", fontSize=9.5, leading=12)
 
     elements: list = []
 
     # --- bandeau ---------------------------------------------------------- #
     bandeau = Table(
-        [[Paragraph(f"EMPLOI DU TEMPS — {echappement_html(donnees['classe'].upper())}", style_bandeau)],
-         [Paragraph(echappement_html(f"{donnees['etablissement']} — {donnees['localite']}"), style_bandeau2)],
-         [Paragraph(echappement_html(
-             f"{donnees['intitule']} • Année scolaire {donnees['annee']} • {donnees['periode']}"
-             f" • Professeur principal : {donnees['prof_principal']}"), style_bandeau2)]],
-        colWidths=[largeur_utile],
-    )
+        [[Paragraph(f"{echappement_html(donnees['titre'])} — "
+                    f"{echappement_html(donnees['famille'].upper())}", s_titre)],
+         [Paragraph(echappement_html(donnees["mention"]), s_sous)],
+         [Paragraph(f"{echappement_html(donnees['localite'])} • "
+                    f"{echappement_html(donnees['annee'])}", s_sous)]],
+        colWidths=[largeur_utile])
     bandeau.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), entete_c),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
         ("LEFTPADDING", (0, 0), (-1, -1), 10),
         ("RIGHTPADDING", (0, 0), (-1, -1), 10),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -364,76 +329,52 @@ def construire_pdf(donnees: dict) -> None:
     elements.append(Spacer(1, 6))
 
     # --- grille ----------------------------------------------------------- #
-    col_heure = 2.4 * cm
+    col_heure = LARGEUR_HORAIRE * cm
     col_jour = (largeur_utile - col_heure) / len(jours)
     largeurs = [col_heure] + [col_jour] * len(jours)
 
-    donnees_table = [[Paragraph("Horaire", style_jour)]
-                     + [Paragraph(echappement_html(j), style_jour) for j in jours]]
-    hauteurs = [0.85 * cm]
-    commandes: list = [
+    donnees_table = [[Paragraph("Horaire", s_jour)] + [Paragraph(echappement_html(j), s_jour) for j in jours]]
+    hauteurs = [HAUTEUR_ENTETE * cm]
+    commandes = [
         ("BACKGROUND", (0, 0), (-1, 0), entete_c),
         ("GRID", (0, 0), (-1, -1), 0.5, grille_c),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 3),
         ("RIGHTPADDING", (0, 0), (-1, -1), 3),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
     ]
 
     for index, creneau in enumerate(creneaux, start=1):
-        if creneau["id"] == "RECRE":
-            donnees_table.append([Paragraph(
-                f"<b>{echappement_html(creneau['libelle'])} — "
-                f"{echappement_html(creneau['debut'])} à {echappement_html(creneau['fin'])}</b>",
-                style_heure)])
-            hauteurs.append(0.62 * cm)
-            commandes += [("SPAN", (0, index), (len(jours), index)),
-                          ("BACKGROUND", (0, index), (-1, index), colors.HexColor(PALETTE["recre"]))]
-            continue
-
-        ligne = [Paragraph(
-            f"<b>{echappement_html(creneau['libelle'])}</b><br/>"
-            f"<font size=7>{echappement_html(creneau['debut'])} – {echappement_html(creneau['fin'])}</font>",
-            style_heure)]
-
-        for colonne, jour in enumerate(jours, start=1):
-            if creneau["id"] in vacants.get(jour, []):
-                ligne.append(Paragraph("<i>sans cours</i>", style_prof))
-                commandes.append(("BACKGROUND", (colonne, index), (colonne, index),
-                                  colors.HexColor(PALETTE["vide"])))
-                continue
-            matiere = donnees["grille"][jour][creneau["id"]]
-            infos = matieres[matiere]
-            ligne.append(Paragraph(
-                f"<b>{echappement_html(matiere)}</b><br/>"
-                f"<font size=6.8>{echappement_html(infos['prof'])}</font><br/>"
-                f"<font size=6.4>{echappement_html(infos['salle'])}</font>",
-                style_cours))
-            commandes.append(("BACKGROUND", (colonne, index), (colonne, index),
-                              colors.HexColor(infos["couleur"])))
-
+        ligne = [Paragraph(echappement_html(creneau["libelle"]), s_heure)]
         commandes.append(("BACKGROUND", (0, index), (0, index), colors.HexColor(PALETTE["horaire"])))
+        for colonne, jour in enumerate(jours, start=1):
+            case = grille.get(jour, {}).get(creneau["id"])
+            if case:
+                ligne.append(Paragraph(echappement_html(case["texte"]), s_cours))
+                commandes.append(("BACKGROUND", (colonne, index), (colonne, index),
+                                  colors.HexColor(matieres[case["matiere"]]["couleur"])))
+            else:
+                ligne.append(Paragraph("", s_cours))
+                commandes.append(("BACKGROUND", (colonne, index), (colonne, index),
+                                  colors.HexColor(PALETTE["libre"])))
         donnees_table.append(ligne)
-        hauteurs.append(1.25 * cm)
+        hauteurs.append(HAUTEUR_LIGNE * cm)
 
     table = Table(donnees_table, colWidths=largeurs, rowHeights=hauteurs, repeatRows=1)
     table.setStyle(TableStyle(commandes))
     elements.append(table)
 
     # --- légende ---------------------------------------------------------- #
-    elements.append(Spacer(1, 6))
-    elements.append(Paragraph("<b>Légende des matières</b> "
-                              "(volume horaire hebdomadaire entre parenthèses) :", style_note))
+    elements.append(Spacer(1, 5))
+    elements.append(Paragraph("<b>Légende :</b>", s_note))
     elements.append(Spacer(1, 3))
 
-    cellules_legende = []
-    for matiere, infos in matieres.items():
-        bloc = Table(
-            [[Paragraph("", style_legende),
-              Paragraph(f"{echappement_html(matiere)} "
-                        f"({format_duree(compte.get(matiere, 0) * duree)})", style_legende)]],
-            colWidths=[1.0 * cm, 4.0 * cm], rowHeights=[0.42 * cm])
+    puces = list(matieres.items()) + [("Créneau libre", {"couleur": PALETTE["libre"]})]
+    cellules = []
+    for libelle, infos in puces:
+        bloc = Table([[Paragraph("", s_legende), Paragraph(echappement_html(libelle), s_legende)]],
+                     colWidths=[1.0 * cm, 4.2 * cm], rowHeights=[0.38 * cm])
         bloc.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (0, 0), colors.HexColor(infos["couleur"])),
             ("BOX", (0, 0), (0, 0), 0.4, grille_c),
@@ -441,40 +382,46 @@ def construire_pdf(donnees: dict) -> None:
             ("LEFTPADDING", (0, 0), (-1, -1), 2),
             ("RIGHTPADDING", (0, 0), (-1, -1), 2),
         ]))
-        cellules_legende.append(bloc)
+        cellules.append(bloc)
 
-    par_ligne = 6
-    lignes_legende = [cellules_legende[i : i + par_ligne] for i in range(0, len(cellules_legende), par_ligne)]
-    lignes_legende[-1] += [""] * (par_ligne - len(lignes_legende[-1]))
-    legende = Table(lignes_legende, colWidths=[largeur_utile / par_ligne] * par_ligne)
-    legende.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-    ]))
+    par_ligne = 4
+    lignes = [cellules[i : i + par_ligne] for i in range(0, len(cellules), par_ligne)]
+    lignes[-1] += [""] * (par_ligne - len(lignes[-1]))
+    legende = Table(lignes, colWidths=[largeur_utile / par_ligne] * par_ligne)
+    legende.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                                 ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                                 ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
     elements.append(legende)
 
-    # --- note + signatures ------------------------------------------------ #
+    # --- répétiteurs ------------------------------------------------------ #
     elements.append(Spacer(1, 6))
-    elements.append(Paragraph(
-        f"Volume horaire hebdomadaire : {total_seances} séances de {duree} min, "
-        f"soit <b>{format_duree(total_seances * duree)}</b>. Les cours s'achèvent le samedi à 11h10. "
-        "Toute modification doit être signalée au secrétariat.", style_note))
-    elements.append(Spacer(1, 14))
+    elements.append(Paragraph("<b>Répétiteurs :</b>", s_titre_bloc))
+    elements.append(Spacer(1, 3))
 
-    signatures = Table(
-        [[Paragraph("<b>Le Professeur principal</b>", style_sign),
-          Paragraph("<b>Le Chef d'établissement</b>", style_sign),
-          Paragraph("<b>Visa du CPE</b>", style_sign)],
-         [Paragraph(echappement_html(donnees["prof_principal"]), style_sign),
-          Paragraph("", style_sign),
-          Paragraph("", style_sign)],
-         [Paragraph("<font color='#9AA5B4'>" + "_" * 34 + "</font>", style_sign),
-          Paragraph("<font color='#9AA5B4'>" + "_" * 34 + "</font>", style_sign),
-          Paragraph("<font color='#9AA5B4'>" + "_" * 34 + "</font>", style_sign)]],
-        colWidths=[largeur_utile / 3.0] * 3)
-    signatures.setStyle(TableStyle([("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
-    elements.append(signatures)
+    entetes = [Paragraph(f"<b><font color='white'>{h}</font></b>", s_cellule)
+               for h in ("Nom et prénom", "Matière", "Jours et horaires")]
+    lignes_rep = [entetes]
+    for repetiteur in repetiteurs:
+        lignes_rep.append([Paragraph(echappement_html(repetiteur["nom"]), s_cellule),
+                           Paragraph(echappement_html(repetiteur["matiere"]), s_cellule),
+                           Paragraph(echappement_html(repetiteur["horaires"]), s_cellule)])
+
+    largeurs_rep = [6.0 * cm, 4.5 * cm, 12.0 * cm]
+    table_rep = Table(lignes_rep, colWidths=largeurs_rep,
+                      rowHeights=[0.60 * cm] + [0.64 * cm] * len(repetiteurs))
+    table_rep.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), entete_c),
+        ("GRID", (0, 0), (-1, -1), 0.5, grille_c),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    elements.append(table_rep)
+
+    # --- note ------------------------------------------------------------- #
+    elements.append(Spacer(1, 4))
+    elements.append(Paragraph(echappement_html(donnees["note"]), s_note))
 
     doc.build(elements)
 
@@ -485,17 +432,15 @@ def main() -> None:
     donnees = charger()
 
     TEX_FILE.write_text(construire_tex(donnees), encoding="utf-8")
-    print(f"  OK  {TEX_FILE.relative_to(HERE.parent)}")
+    print(f"  OK  {TEX_FILE.name}")
 
     construire_pdf(donnees)
     if PDF_FILE.exists():
-        print(f"  OK  {PDF_FILE.relative_to(HERE.parent)}")
+        print(f"  OK  {PDF_FILE.name}")
 
-    compte = volume_horaire(donnees)
-    total = sum(compte.values())
-    print(f"\n  {total} séances — {format_duree(total * donnees['duree_seance_min'])} par semaine")
-    for matiere, nombre in sorted(compte.items(), key=lambda kv: -kv[1]):
-        print(f"    {matiere:<24} {nombre} séances  ({format_duree(nombre * donnees['duree_seance_min'])})")
+    remplis = sum(len(v) for v in donnees["grille"].values())
+    print(f"\n  {len(donnees['jours'])} jours × {len(donnees['creneaux'])} créneaux"
+          f" — {remplis} case(s) renseignée(s)")
 
 
 if __name__ == "__main__":
