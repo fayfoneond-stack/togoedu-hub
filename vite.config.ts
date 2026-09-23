@@ -217,6 +217,8 @@ export default defineConfig({
         // Follow in-app links from the prerendered entry to statically render
         // every reachable route.
         crawlLinks: true,
+        // PDF downloads are static binary assets, not pages to prerender as text.
+        filter: (page) => !page.path.split(/[?#]/)[0].toLowerCase().endsWith('.pdf'),
         // CRITICAL: do NOT fail the build when a crawled link 404s. Broken /
         // example / dynamic / auth-gated links are common, and `crawlLinks`
         // follows ALL of them — without this, ONE dead link aborts the whole
