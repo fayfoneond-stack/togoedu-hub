@@ -1,0 +1,619 @@
+% ============================================================================
+%  FICHE DE PRÉPARATION DE LEÇON — MATHÉMATIQUES
+%  Classe            : 1re D
+%  Thème             : Calculs algébriques
+%  Leçon             : Systèmes linéaires dans R^2 et dans R^3
+%  Année scolaire    : 2026 – 2027
+%  Nombre de séances : 2            Durée : 55 min x 2 = 1 h 50
+%
+%  Compilation : Overleaf ou pdflatex (compilable directement, 2 passages).
+%  Code couleur des étapes :
+%     violet  = mise en situation      orange = découverte / investigation
+%     bleu    = trace écrite           vert   = application
+%     rouge   = évaluation
+% ============================================================================
+
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[margin=1.4cm]{geometry}
+
+\usepackage[table]{xcolor}          % couleurs des cellules du tableau
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, babel} % babel : pour les ; actifs en français
+\usepackage[most]{tcolorbox}
+
+% ------------------------------------------------------------------ couleurs
+\definecolor{entete}{RGB}{27,54,93}        % bleu nuit (bandeaux, en-têtes)
+\definecolor{situ}{RGB}{123,94,167}        % violet  : mise en situation
+\definecolor{rech}{RGB}{214,120,20}        % orange  : découverte / investigation
+\definecolor{trac}{RGB}{31,111,178}        % bleu    : trace écrite
+\definecolor{appl}{RGB}{34,139,87}         % vert    : application
+\definecolor{evalc}{RGB}{192,57,43}        % rouge   : évaluation
+\definecolor{fond}{RGB}{245,247,250}       % fond très clair
+
+% première colonne « Structure du cours » : pastille de la couleur de l'étape
+\newcommand{\etape}[2]{%
+  \cellcolor{#1}\textbf{\textcolor{white}{#2}}}
+
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.22}
+\pagestyle{plain}
+
+\begin{document}
+
+% =============================================================== EN-TÊTE ====
+\begin{center}
+  {\small RÉPUBLIQUE TOGOLAISE \quad\textbullet\quad Travail -- Liberté -- Patrie}\\[4pt]
+  {\large\textbf{\textsc{Fiche de préparation de leçon}}}\\[2pt]
+  {\large\textbf{MATHÉMATIQUES}}
+\end{center}
+
+\vspace{4pt}
+\noindent\colorbox{entete}{%
+  \parbox[c][1.15cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
+    \centering\color{white}%
+    {\Large\textbf{Thème : Calculs algébriques}}\quad{\large\textbf{--}}\quad
+    {\Large\textbf{Leçon : Systèmes linéaires dans $\mathbb{R}^2$ et dans $\mathbb{R}^3$}}%
+  }%
+}
+
+\vspace{6pt}
+\noindent
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.1cm}|X|>{\bfseries}p{3.1cm}|X|}
+\hline
+Classe & 1\textsuperscript{re} D & Année scolaire & 2026 -- 2027 \\
+\hline
+Discipline & Mathématiques & Durée & 55 min $\times$ 2 = 1 h 50 \\
+\hline
+Thème & Calculs algébriques & Nombre de séances & 2 \\
+\hline
+Leçon & \multicolumn{3}{p{0.62\textwidth}|}{Systèmes linéaires dans $\mathbb{R}^2$ et dans $\mathbb{R}^3$} \\
+\hline
+Prérequis & \multicolumn{3}{p{0.62\textwidth}|}{%
+  Équations du premier degré à une inconnue ; équation cartésienne d'une droite
+  du plan ; calcul littéral et priorité des opérations ; repère du plan.} \\
+\hline
+Support / matériel & \multicolumn{3}{p{0.62\textwidth}|}{%
+  Manuel de mathématiques 1\textsuperscript{re} D, papier millimétré, règle,
+  calculatrice scientifique, fiche d'exercices.} \\
+\hline
+\end{tabularx}
+
+% --------------------------------------------------------------- légende ---
+\vspace{6pt}
+\noindent{\footnotesize
+\textbf{Code couleur : }
+\colorbox{situ}{\textcolor{white}{\,mise en situation\,}}\;
+\colorbox{rech}{\textcolor{white}{\,découverte / investigation\,}}\;
+\colorbox{trac}{\textcolor{white}{\,trace écrite\,}}\;
+\colorbox{appl}{\textcolor{white}{\,application\,}}\;
+\colorbox{evalc}{\textcolor{white}{\,évaluation\,}}}
+
+% ============================================================== SÉANCE 1 ====
+\vspace{10pt}
+\noindent\colorbox{trac}{%
+  \parbox[c][0.72cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
+    \color{white}\large\textbf{SÉANCE 1 --- Systèmes linéaires dans $\mathbb{R}^2$ (55 min)}}%
+}
+
+\vspace{6pt}
+\noindent
+\begin{tabularx}{\textwidth}{|p{2.9cm}|X|p{4.5cm}|p{4.2cm}|}
+\hline
+\rowcolor{entete}
+\textcolor{white}{\textbf{Structure du cours}} &
+\textcolor{white}{\textbf{Capacités et contenus}} &
+\textcolor{white}{\textbf{Consignes}} &
+\textcolor{white}{\textbf{Évaluations}} \\
+\hline
+
+\rowcolor{situ!10}
+\etape{situ}{Mise en situation\newline(8 min)} &
+\footnotesize Mobiliser les prérequis : équation du premier degré et droite du plan. &
+\footnotesize \og Résous $2x+3=11$, puis trace sur ton papier millimétré la droite d'équation $y=2x-1$. \fg &
+\footnotesize \textbf{Diagnostique.} Critère : exactitude des prérequis. Indicateur : équation résolue et droite tracée sans erreur. Outil : observation + correction au tableau. \\
+\hline
+
+\rowcolor{rech!10}
+\etape{rech}{Découverte / Investigation\newline(12 min)} &
+\footnotesize Traduire une situation-problème par un système de deux équations à deux inconnues ; rechercher une solution. &
+\footnotesize \og En binômes : traduis la situation du commerçant par deux équations en $x$ et $y$, puis trouve le nombre de cahiers et de stylos vendus. \fg &
+\footnotesize \textbf{Formative.} Critère : pertinence de la mise en équations. Indicateurs : deux équations correctes ; démarche expliquée. Outil : grille d'observation, passage dans les rangs. \\
+\hline
+
+\rowcolor{trac!10}
+\etape{trac}{Trace écrite\newline(15 min)} &
+\footnotesize Connaître la définition d'un système linéaire dans $\mathbb{R}^2$ ; appliquer les méthodes de substitution, de combinaison linéaire et de Cramer ; discuter la nature des solutions. &
+\footnotesize \og Recopie et complète la trace écrite : définition, les trois méthodes de résolution, puis le tableau de discussion selon $\Delta$. \fg &
+\footnotesize \textbf{Formative.} Critère : conformité de la trace écrite. Indicateurs : définition complète ; formules de $\Delta$, $\Delta_x$, $\Delta_y$ exactes. Outil : contrôle des cahiers. \\
+\hline
+
+\rowcolor{appl!10}
+\etape{appl}{Application\newline(15 min)} &
+\footnotesize Résoudre un système dans $\mathbb{R}^2$ ; interpréter graphiquement la solution comme point d'intersection de deux droites. &
+\footnotesize \og Résous les exercices 1 à 4 de la fiche, puis représente graphiquement le système de l'exercice 1 et lis la solution sur le graphique. \fg &
+\footnotesize \textbf{Formative.} Critère : exactitude des calculs et de la lecture graphique. Indicateurs : calculs justes ; point d'intersection correctement placé. Outil : correction individuelle notée sur 10. \\
+\hline
+
+\rowcolor{evalc!10}
+\etape{evalc}{Évaluation\newline(5 min)} &
+\footnotesize Choisir la méthode la plus adaptée et résoudre rapidement un système. &
+\footnotesize \og En 5 minutes, résous $(S):\;3x+2y=8$ et $x-y=1$. \fg &
+\footnotesize \textbf{Sommative.} Barème /10 : compréhension 2 pts, mise en équations 3 pts, calculs 3 pts, présentation 2 pts. \\
+\hline
+\end{tabularx}
+
+% ------------------------------------------------- situation-problème (S1) --
+\vspace{8pt}
+\begin{tcolorbox}[colback=situ!5, colframe=situ, boxrule=0.8pt, arc=2pt,
+                  left=6pt, right=6pt, top=4pt, bottom=4pt,
+                  title={\textbf{Situation-problème --- séance 1}},
+                  colbacktitle=situ, coltitle=white, fonttitle=\bfseries]
+Un commerçant de Lomé vend des cahiers à \textbf{350 F} l'unité et des stylos à
+\textbf{150 F} l'unité. À la fin de la journée, il a vendu \textbf{12 articles}
+pour une recette totale de \textbf{3\,200 F}.
+
+\smallskip
+\og Combien de cahiers et de stylos a-t-il vendus ? \fg
+
+\smallskip
+Travail attendu : poser $x$ = nombre de cahiers et $y$ = nombre de stylos, écrire
+les deux équations, résoudre, puis vérifier.
+\end{tcolorbox}
+
+% ------------------------------------------------------- trace écrite (S1) --
+\begin{tcolorbox}[breakable, enhanced, colback=trac!4, colframe=trac, boxrule=0.9pt,
+                  arc=2pt, left=7pt, right=7pt, top=5pt, bottom=5pt,
+                  title={\textbf{TRACE ÉCRITE --- Séance 1 : systèmes linéaires dans $\mathbb{R}^2$}},
+                  colbacktitle=trac, coltitle=white, fonttitle=\bfseries]
+
+\textbf{1. Définition.}
+On appelle \textbf{système linéaire de deux équations à deux inconnues} $x$ et $y$
+dans $\mathbb{R}^2$, tout système de la forme
+\[
+(S)\;:\;\begin{cases}
+ax+by=c\\[2pt]
+a'x+b'y=c'
+\end{cases}
+\qquad (a,\;b,\;a',\;b',\;c,\;c')\in\mathbb{R}^6 .
+\]
+\textbf{Résoudre} $(S)$ dans $\mathbb{R}^2$, c'est déterminer l'ensemble des couples
+$(x;y)\in\mathbb{R}^2$ qui vérifient \emph{simultanément} les deux équations.
+
+\textbf{2. Méthode par substitution.}
+On exprime une inconnue en fonction de l'autre dans une équation, puis on la
+substitue dans la seconde.
+\[
+\begin{cases}
+2x+3y=12\\
+x-y=1
+\end{cases}
+\;\Longrightarrow\;
+\begin{cases}
+x=y+1\\
+2(y+1)+3y=12
+\end{cases}
+\;\Longrightarrow\;5y=10\;\Longrightarrow\;y=2,\;x=3.
+\]
+
+\textbf{3. Méthode par combinaison linéaire.}
+On multiplie les équations par des réels non nuls, puis on les additionne pour
+éliminer une inconnue.
+\[
+\begin{cases}
+2x+3y=12 \quad (1)\\
+x-y=1 \quad (2)
+\end{cases}
+\;\xrightarrow{(1)+3\times(2)}\;
+5x=15\;\Longrightarrow\;x=3,\;\text{puis } y=2.
+\]
+
+\textbf{4. Méthode de Cramer (déterminants).}
+\[
+\Delta=\begin{vmatrix}a&b\\ a'&b'\end{vmatrix}=ab'-a'b,\qquad
+\Delta_x=\begin{vmatrix}c&b\\ c'&b'\end{vmatrix}=cb'-c'b,\qquad
+\Delta_y=\begin{vmatrix}a&c\\ a'&c'\end{vmatrix}=ac'-a'c .
+\]
+Exemple : $\Delta=2(-1)-1\times3=-5$, $\Delta_x=12(-1)-1\times3=-15$,
+$\Delta_y=2\times1-1\times12=-10$, d'où
+$x=\dfrac{\Delta_x}{\Delta}=\dfrac{-15}{-5}=3$ et
+$y=\dfrac{\Delta_y}{\Delta}=\dfrac{-10}{-5}=2$.
+
+\textbf{5. Discussion --- nature des solutions.}
+\begin{center}
+\begin{tabularx}{0.97\linewidth}{|p{3.4cm}|p{3.5cm}|X|}
+\hline
+\rowcolor{entete}\textcolor{white}{\textbf{Cas}} &
+\textcolor{white}{\textbf{Solution}} &
+\textcolor{white}{\textbf{Interprétation graphique}}\\
+\hline
+$\Delta\neq0$ & une solution unique $(x;y)$ & les deux droites sont \textbf{sécantes} \\
+\hline
+$\Delta=0$ et $\Delta_x=\Delta_y=0$ & une infinité de solutions & les deux droites sont \textbf{confondues} \\
+\hline
+$\Delta=0$ et $\Delta_x\neq0$ ou $\Delta_y\neq0$ & aucune solution & les deux droites sont \textbf{strictement parallèles} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\textbf{6. Interprétation graphique.}
+Chaque équation représente une droite du plan ; résoudre le système revient à
+chercher le (ou les) point(s) commun(s) aux deux droites.
+\begin{center}
+\begin{tikzpicture}[scale=0.95, >=Stealth]
+  \draw[help lines, color=gray!22] (-0.6,-0.8) grid (6.6,5.4);
+  \draw[->, thick] (-0.6,0) -- (6.8,0) node[right] {$x$};
+  \draw[->, thick] (0,-0.8) -- (0,5.6) node[above] {$y$};
+  \foreach \x in {1,...,6} \draw (\x,0.09) -- (\x,-0.09) node[below, font=\tiny] {\x};
+  \foreach \y in {1,...,5} \draw (0.09,\y) -- (-0.09,\y) node[left, font=\tiny] {\y};
+  \node[below left, font=\scriptsize] at (0,0) {$O$};
+  \draw[thick, blue, domain=0:6] plot (\x, {4 - 2*\x/3}) node[right, blue] {$d_1:\;2x+3y=12$};
+  \draw[thick, red, domain=0:6] plot (\x, {\x - 1}) node[above right, red] {$d_2:\;x-y=1$};
+  \filldraw[black] (3,2) circle (2.2pt) node[above right] {$S(3\,;\,2)$};
+  \draw[dotted] (3,0) -- (3,2) -- (0,2);
+\end{tikzpicture}
+\end{center}
+
+\textbf{7. Les trois configurations possibles.}
+\begin{center}
+\begin{tikzpicture}[scale=0.62, >=Stealth]
+  % cas 1 : sécantes
+  \begin{scope}
+    \draw[help lines, gray!22] (0,0) grid (4,4);
+    \draw[->] (0,0) -- (4.4,0) node[right, font=\tiny] {$x$};
+    \draw[->] (0,0) -- (0,4.4) node[above, font=\tiny] {$y$};
+    \draw[thick, blue] (0,3.4) -- (3.4,0);
+    \draw[thick, red] (0,0.6) -- (3.4,4);
+    \filldraw (2,1.5) circle (2pt);
+    \node[below, align=center, font=\scriptsize] at (2,-0.5)
+      {\textbf{1 solution}\\ droites sécantes};
+  \end{scope}
+  % cas 2 : parallèles
+  \begin{scope}[xshift=5.8cm]
+    \draw[help lines, gray!22] (0,0) grid (4,4);
+    \draw[->] (0,0) -- (4.4,0) node[right, font=\tiny] {$x$};
+    \draw[->] (0,0) -- (0,4.4) node[above, font=\tiny] {$y$};
+    \draw[thick, blue] (0,3.2) -- (4,1.2);
+    \draw[thick, red] (0,1.2) -- (4,-0.8);
+    \node[below, align=center, font=\scriptsize] at (2,-0.5)
+      {\textbf{0 solution}\\ droites parallèles};
+  \end{scope}
+  % cas 3 : confondues
+  \begin{scope}[xshift=11.6cm]
+    \draw[help lines, gray!22] (0,0) grid (4,4);
+    \draw[->] (0,0) -- (4.4,0) node[right, font=\tiny] {$x$};
+    \draw[->] (0,0) -- (0,4.4) node[above, font=\tiny] {$y$};
+    \draw[thick, blue] (0,3.4) -- (3.4,0);
+    \draw[thick, red, dashed] (0.15,3.55) -- (3.55,0.15);
+    \node[below, align=center, font=\scriptsize] at (2,-0.5)
+      {\textbf{une infinité}\\ droites confondues};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{tcolorbox}
+
+% ---------------------------------------------------------- application S1 --
+\begin{tcolorbox}[colback=appl!5, colframe=appl, boxrule=0.8pt, arc=2pt,
+                  left=6pt, right=6pt, top=4pt, bottom=4pt,
+                  title={\textbf{APPLICATION --- Séance 1}},
+                  colbacktitle=appl, coltitle=white, fonttitle=\bfseries]
+\begin{enumerate}[label=\textbf{Exercice \arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Résoudre par substitution : $\begin{cases}3x-2y=7\\ x+y=4\end{cases}$
+  \item Résoudre par combinaison linéaire : $\begin{cases}5x+2y=1\\ 3x-y=11\end{cases}$
+  \item Résoudre par la méthode de Cramer et discuter :
+        $\begin{cases}2x-4y=6\\ x-2y=3\end{cases}$
+        puis $\begin{cases}2x-4y=6\\ x-2y=5\end{cases}$
+  \item Résoudre la situation-problème du commerçant (cahiers à 350 F, stylos
+        à 150 F, 12 articles, 3\,200 F) et vérifier le résultat.
+\end{enumerate}
+\end{tcolorbox}
+
+% ============================================================== SÉANCE 2 ====
+\newpage
+\noindent\colorbox{trac}{%
+  \parbox[c][0.72cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
+    \color{white}\large\textbf{SÉANCE 2 --- Systèmes linéaires dans $\mathbb{R}^3$ (55 min)}}%
+}
+
+\vspace{6pt}
+\noindent
+\begin{tabularx}{\textwidth}{|p{2.9cm}|X|p{4.5cm}|p{4.2cm}|}
+\hline
+\rowcolor{entete}
+\textcolor{white}{\textbf{Structure du cours}} &
+\textcolor{white}{\textbf{Capacités et contenus}} &
+\textcolor{white}{\textbf{Consignes}} &
+\textcolor{white}{\textbf{Évaluations}} \\
+\hline
+
+\rowcolor{situ!10}
+\etape{situ}{Mise en situation\newline(8 min)} &
+\footnotesize Réactiver la résolution dans $\mathbb{R}^2$ et introduire la troisième inconnue ; repérer un point dans l'espace. &
+\footnotesize \og Résous le système $\begin{cases}x+y=5\\ 2x-y=1\end{cases}$, puis place le point $A(2;3;1)$ dans le repère de l'espace. \fg &
+\footnotesize \textbf{Diagnostique.} Critère : maîtrise du cas $\mathbb{R}^2$. Indicateurs : système résolu ; point placé. Outil : correction collective rapide. \\
+\hline
+
+\rowcolor{rech!10}
+\etape{rech}{Découverte / Investigation\newline(12 min)} &
+\footnotesize Traduire une situation à trois inconnues par un système de trois équations ; découvrir l'échelonnement. &
+\footnotesize \og En groupes de quatre : écris les trois équations traduisant les achats de Marie, Paul et Afi, puis cherche le prix d'un cahier, d'un stylo et d'une règle. \fg &
+\footnotesize \textbf{Formative.} Critère : mise en équations à trois inconnues. Indicateurs : trois équations correctes ; essais argumentés. Outil : grille d'observation. \\
+\hline
+
+\rowcolor{trac!10}
+\etape{trac}{Trace écrite\newline(15 min)} &
+\footnotesize Définir un système linéaire dans $\mathbb{R}^3$ ; appliquer la méthode du pivot de Gauss ; interpréter le résultat (trois plans). &
+\footnotesize \og Recopie la trace écrite : définition, les trois opérations élémentaires sur les lignes, l'exemple échelonné et son interprétation géométrique. \fg &
+\footnotesize \textbf{Formative.} Critère : conformité de la trace écrite. Indicateurs : opérations élémentaires énoncées ; substitutions ascendantes correctes. Outil : contrôle des cahiers. \\
+\hline
+
+\rowcolor{appl!10}
+\etape{appl}{Application\newline(15 min)} &
+\footnotesize Échelonner un système de trois équations à trois inconnues ; remonter les substitutions ; vérifier la solution. &
+\footnotesize \og Résous par la méthode du pivot les exercices 1 et 2, puis vérifie chaque solution dans les trois équations. \fg &
+\footnotesize \textbf{Formative.} Critère : exactitude de l'échelonnement et de la vérification. Indicateurs : système échelonné équivalent ; triplet solution exact. Outil : correction notée sur 10. \\
+\hline
+
+\rowcolor{evalc!10}
+\etape{evalc}{Évaluation\newline(5 min)} &
+\footnotesize Résoudre un système dans $\mathbb{R}^3$ en autonomie. &
+\footnotesize \og Résous : $x+y+z=6$, $2x-y+z=2$, $x+2y-3z=5$. \fg &
+\footnotesize \textbf{Sommative.} Barème /10 : mise en système 3 pts, échelonnement 4 pts, solution 2 pts, vérification 1 pt. \\
+\hline
+\end{tabularx}
+
+% ------------------------------------------------- situation-problème (S2) --
+\vspace{8pt}
+\begin{tcolorbox}[colback=situ!5, colframe=situ, boxrule=0.8pt, arc=2pt,
+                  left=6pt, right=6pt, top=4pt, bottom=4pt,
+                  title={\textbf{Situation-problème --- séance 2}},
+                  colbacktitle=situ, coltitle=white, fonttitle=\bfseries]
+Trois élèves achètent des fournitures à la même papeterie :
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Marie} : 3 cahiers, 2 stylos et 1 règle, elle paie \textbf{1\,450 F} ;
+  \item \textbf{Paul} : 1 cahier, 3 stylos et 2 règles, il paie \textbf{1\,250 F} ;
+  \item \textbf{Afi} : 2 cahiers, 1 stylo et 3 règles, elle paie \textbf{1\,500 F}.
+\end{itemize}
+\og Quel est le prix d'un cahier, d'un stylo et d'une règle ? \fg
+
+\smallskip
+Travail attendu : poser $x$ = prix d'un cahier, $y$ = prix d'un stylo,
+$z$ = prix d'une règle, écrire les trois équations, puis résoudre.
+\end{tcolorbox}
+
+% ------------------------------------------------------- trace écrite (S2) --
+\begin{tcolorbox}[breakable, enhanced, colback=trac!4, colframe=trac, boxrule=0.9pt,
+                  arc=2pt, left=7pt, right=7pt, top=5pt, bottom=5pt,
+                  title={\textbf{TRACE ÉCRITE --- Séance 2 : systèmes linéaires dans $\mathbb{R}^3$}},
+                  colbacktitle=trac, coltitle=white, fonttitle=\bfseries]
+
+\textbf{1. Définition.}
+Un \textbf{système linéaire de trois équations à trois inconnues} $x$, $y$, $z$
+dans $\mathbb{R}^3$ s'écrit
+\[
+(S)\;:\;\begin{cases}
+a_1x+b_1y+c_1z=d_1\\
+a_2x+b_2y+c_2z=d_2\\
+a_3x+b_3y+c_3z=d_3
+\end{cases}
+\]
+\textbf{Résoudre} $(S)$ dans $\mathbb{R}^3$, c'est déterminer l'ensemble des triplets
+$(x;y;z)\in\mathbb{R}^3$ vérifiant simultanément les trois équations.
+
+\textbf{2. Systèmes équivalents.}
+Deux systèmes sont \textbf{équivalents} lorsqu'ils ont le même ensemble de
+solutions. On obtient un système équivalent par l'une des \textbf{trois
+opérations élémentaires} sur les lignes :
+\begin{enumerate}[label=\alph*), leftmargin=*, itemsep=2pt]
+  \item permuter deux lignes ;
+  \item multiplier une ligne par un réel non nul ;
+  \item ajouter à une ligne un multiple d'une autre ligne.
+\end{enumerate}
+
+\textbf{3. Méthode du pivot de Gauss (échelonnement).}
+On élimine $x$ dans les lignes 2 et 3 à l'aide de la ligne 1 (le \textbf{pivot}),
+puis $y$ dans la ligne 3 : le système devient \textbf{échelonné}. On remonte
+ensuite les substitutions (de la dernière ligne vers la première).
+
+\textbf{4. Exemple résolu.}
+\[
+(S)\;:\;\begin{cases}
+x+y+z=6 \quad (L_1)\\
+2x-y+3z=9 \quad (L_2)\\
+x+2y-z=2 \quad (L_3)
+\end{cases}
+\]
+\[
+\begin{array}{rcl}
+L_2 &\longleftarrow& L_2-2L_1 \;:\; -3y+z=-3\\[2pt]
+L_3 &\longleftarrow& L_3-L_1 \;:\; y-2z=-4
+\end{array}
+\]
+D'où, par substitutions ascendantes : $z=3y-3$, puis
+$y-2(3y-3)=-4 \Rightarrow -5y=-10 \Rightarrow y=2$ ; $z=3\times2-3=3$ ;
+enfin dans $L_1$ : $x=6-2-3=1$.
+
+\[
+\boxed{S=\{(1\,;\,2\,;\,3)\}}
+\]
+\textbf{Vérification :} $1+2+3=6$ ; $2(1)-2+3(3)=9$ ; $1+2(2)-3=2$. \quad{\checkmark}
+
+\textbf{5. Interprétation géométrique.}
+Dans l'espace muni d'un repère $(O;\vec{\imath},\vec{\jmath},\vec{k})$, chacune
+des trois équations représente un \textbf{plan}. Le système admet :
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item une \textbf{unique solution} si les trois plans se coupent en un point ;
+  \item une \textbf{infinité de solutions} s'ils ont une droite (ou un plan) commun ;
+  \item \textbf{aucune solution} s'ils n'ont aucun point commun.
+\end{itemize}
+\begin{center}
+\begin{tikzpicture}[scale=1.12, >=Stealth,
+    x={(-0.72cm,-0.36cm)}, y={(1.0cm,-0.26cm)}, z={(0cm,1cm)}]
+  % axes
+  \draw[->, thick] (0,0,0) -- (3.5,0,0) node[below left] {$x$};
+  \draw[->, thick] (0,0,0) -- (0,3.5,0) node[below right] {$y$};
+  \draw[->, thick] (0,0,0) -- (0,0,3.4) node[above] {$z$};
+  % squelette du repère
+  \draw[dashed, gray!55] (3,0,0) -- (3,3,0) -- (0,3,0);
+  \draw[dashed, gray!55] (0,3,0) -- (0,3,3) -- (0,0,3);
+  \draw[dashed, gray!55] (0,0,3) -- (3,0,3) -- (3,0,0);
+  % les trois plans (tous passent par le point d'intersection)
+  \filldraw[fill=blue!20, draw=blue!70!black, fill opacity=0.55]
+    (0.6,0.6,2.2) -- (2.6,0.6,1.2) -- (2.6,2.6,0.6) -- (0.6,2.6,1.6) -- cycle;
+  \filldraw[fill=red!18, draw=red!70!black, fill opacity=0.55]
+    (0.6,0.6,1.8) -- (2.6,0.6,2.6) -- (2.6,2.6,1.0) -- (0.6,2.6,0.2) -- cycle;
+  \filldraw[fill=green!20, draw=green!45!black, fill opacity=0.55]
+    (0.6,0.6,0.0) -- (2.6,0.6,1.8) -- (2.6,2.6,2.8) -- (0.6,2.6,1.0) -- cycle;
+  % point d'intersection
+  \filldraw (1.6,1.6,1.4) circle (2.2pt) node[above right] {$S(1\,;\,2\,;\,3)$};
+  \node[blue!70!black, font=\scriptsize] at (3.0,1.0,1.9) {$\pi_1$};
+  \node[red!70!black, font=\scriptsize] at (0.4,1.6,2.6) {$\pi_2$};
+  \node[green!45!black, font=\scriptsize] at (2.9,2.4,2.6) {$\pi_3$};
+\end{tikzpicture}
+\end{center}
+\end{tcolorbox}
+
+% ---------------------------------------------------------- application S2 --
+\begin{tcolorbox}[colback=appl!5, colframe=appl, boxrule=0.8pt, arc=2pt,
+                  left=6pt, right=6pt, top=4pt, bottom=4pt,
+                  title={\textbf{APPLICATION --- Séance 2}},
+                  colbacktitle=appl, coltitle=white, fonttitle=\bfseries]
+\begin{enumerate}[label=\textbf{Exercice \arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Résoudre par la méthode du pivot :
+        $\begin{cases}x+y+z=6\\ 2x-y+z=2\\ x+2y-3z=5\end{cases}$
+  \item Résoudre la situation-problème de la papeterie (Marie, Paul, Afi) et
+        vérifier les trois équations.
+  \item Résoudre : $\begin{cases}2x+y-z=1\\ x-2y+z=3\\ 3x+y+2z=12\end{cases}$
+\end{enumerate}
+\end{tcolorbox}
+
+% ============================================================ ÉVALUATION ====
+\newpage
+\noindent\colorbox{evalc}{%
+  \parbox[c][0.72cm][c]{\dimexpr\linewidth-2\fboxsep\relax}{%
+    \color{white}\large\textbf{ÉVALUATION SOMMATIVE --- 1 h 50 de cours, 2 séances}}%
+}
+
+\vspace{8pt}
+\begin{tcolorbox}[colback=evalc!5, colframe=evalc, boxrule=0.8pt, arc=2pt,
+                  left=7pt, right=7pt, top=5pt, bottom=5pt,
+                  title={\textbf{Énoncé (durée : 30 min --- noté sur 20)}},
+                  colbacktitle=evalc, coltitle=white, fonttitle=\bfseries]
+
+\textbf{Partie A --- Systèmes dans $\mathbb{R}^2$ (8 points)}
+\begin{enumerate}[leftmargin=*, itemsep=4pt]
+  \item Résoudre par la méthode de Cramer : $\begin{cases}3x+2y=8\\ x-y=1\end{cases}$ \hfill (4 pts)
+  \item Discuter, sans résoudre complètement, la nature des solutions de
+        $\begin{cases}4x-6y=10\\ 2x-3y=7\end{cases}$ ; interpréter graphiquement. \hfill (4 pts)
+\end{enumerate}
+
+\textbf{Partie B --- Systèmes dans $\mathbb{R}^3$ (8 points)}
+\begin{enumerate}[resume, leftmargin=*, itemsep=4pt]
+  \item Résoudre par la méthode du pivot de Gauss :
+        $\begin{cases}x+y+z=6\\ 2x-y+z=2\\ x+2y-3z=5\end{cases}$ \hfill (6 pts)
+  \item Que représente, dans l'espace, chacune des trois équations de la
+        question 3 ? Que traduit la solution trouvée ? \hfill (2 pts)
+\end{enumerate}
+
+\textbf{Partie C --- Situation-problème (4 points)}
+\begin{enumerate}[resume, leftmargin=*, itemsep=4pt]
+  \item Un libraire vend des romans à 2\,500 F et des bandes dessinées à
+        1\,500 F. Il vend 20 livres pour 42\,000 F. Combien a-t-il vendu de
+        romans et de bandes dessinées ? \hfill (4 pts)
+\end{enumerate}
+\end{tcolorbox}
+
+% ------------------------------------------------------------------ grille --
+\vspace{6pt}
+\noindent
+\begin{tabularx}{\textwidth}{|p{5.4cm}|p{3.0cm}|X|}
+\hline
+\rowcolor{entete}
+\textcolor{white}{\textbf{Critères d'évaluation}} &
+\textcolor{white}{\textbf{Barème}} &
+\textcolor{white}{\textbf{Indicateurs de réussite}}\\
+\hline
+Compréhension de la consigne et identification des inconnues & 3 pts &
+Les inconnues sont clairement posées ; le système est correctement identifié. \\
+\hline
+Mise en équations / choix de la méthode & 6 pts &
+$\mathbb{R}^2$ : substitution, combinaison ou Cramer bien choisie. $\mathbb{R}^3$ : pivot et opérations élémentaires correctes. \\
+\hline
+Exactitude des calculs et de la discussion & 8 pts &
+Déterminants $\Delta,\Delta_x,\Delta_y$ justes ; échelonnement exact ; nature des solutions correctement discutée. \\
+\hline
+Présentation, rigueur et vérification & 3 pts &
+Étapes ordonnées, résultat encadré, vérification dans les équations de départ. \\
+\hline
+\rowcolor{fond} \textbf{Total} & \textbf{20 pts} & Seuil de réussite : 10/20. \\
+\hline
+\end{tabularx}
+
+% ---------------------------------------------------------------- corrigés --
+\vspace{10pt}
+\noindent{\large\textbf{CORRIGÉS}}
+
+\vspace{4pt}
+\noindent\textbf{Séance 1 (application)}
+\begin{enumerate}[leftmargin=*, itemsep=3pt]
+  \item $x+y=4 \Rightarrow y=4-x$ ; $3x-2(4-x)=7 \Rightarrow 5x=15 \Rightarrow x=3$ ; $y=1$. \quad $S=\{(3\,;\,1)\}$.
+  \item $(2)\times2$ : $6x-2y=22$ ; avec $(1)$ : $11x=23 \Rightarrow x=\dfrac{23}{11}$ ;
+        $y=3x-11=\dfrac{69}{11}-11=-\dfrac{52}{11}$. \quad $S=\left\{\left(\dfrac{23}{11}\,;\,-\dfrac{52}{11}\right)\right\}$.
+  \item Premier système : $\Delta=2(-2)-1(-4)=0$, $\Delta_x=6(-2)-3(-4)=0$,
+        $\Delta_y=2\times3-1\times6=0$ : droites confondues,
+        $S=\{(x;y)\in\mathbb{R}^2 \ /\ x-2y=3\}$.
+        Second système : $\Delta=0$, $\Delta_x=6(-2)-5(-4)=8\neq0$ : droites
+        strictement parallèles, $S=\varnothing$.
+  \item $x+y=12$ et $350x+150y=3\,200$ ; $x=7$ cahiers et $y=5$ stylos
+        ($350\times7+150\times5=2\,450+750=3\,200$~F).
+\end{enumerate}
+
+\noindent\textbf{Séance 2 (application)}
+\begin{enumerate}[leftmargin=*, itemsep=3pt]
+  \item $L_2\leftarrow L_2-2L_1:\ -3y-z=-10$ ; $L_3\leftarrow L_3-L_1:\ y-4z=-1$.
+        De la première : $z=10-3y$ ; dans la seconde :
+        $y-4(10-3y)=-1 \Rightarrow 13y=39 \Rightarrow y=3$ ; puis $z=1$ et,
+        dans $L_1$, $x=6-3-1=2$. \quad $S=\{(2\,;\,3\,;\,1)\}$.
+  \item $3x+2y+z=1\,450$, $x+3y+2z=1\,250$, $2x+y+3z=1\,500$ ;
+        $S=\{(300\,;\,150\,;\,250)\}$ : cahier 300~F, stylo 150~F, règle 250~F.
+  \item $L_1:2x+y-z=1$, $L_2:x-2y+z=3$, $L_3:3x+y+2z=12$.
+        De $L_2$ : $x=3+2y-z$. Dans $L_1$ : $2(3+2y-z)+y-z=1 \Rightarrow 5y-3z=-5$.
+        Dans $L_3$ : $3(3+2y-z)+y+2z=12 \Rightarrow 7y-z=3 \Rightarrow z=7y-3$.
+        D'où $5y-3(7y-3)=-5 \Rightarrow -16y=-14 \Rightarrow y=\dfrac{7}{8}$ ;
+        $z=7\times\dfrac{7}{8}-3=\dfrac{25}{8}$ ;
+        $x=3+2\times\dfrac{7}{8}-\dfrac{25}{8}=\dfrac{13}{8}$.
+        \quad $S=\left\{\left(\dfrac{13}{8}\,;\,\dfrac{7}{8}\,;\,\dfrac{25}{8}\right)\right\}$.
+\end{enumerate}
+
+\noindent\textbf{Évaluation sommative}
+\begin{enumerate}[leftmargin=*, itemsep=3pt]
+  \item Partie A, 1) : $\Delta=3(-1)-1\times2=-5$ ; $\Delta_x=8(-1)-1\times2=-10$ ;
+        $\Delta_y=3\times1-1\times8=-5$ ; d'où $x=\dfrac{-10}{-5}=2$ et
+        $y=\dfrac{-5}{-5}=1$. \quad $S=\{(2\,;\,1)\}$.
+  \item Partie A, 2) : $\Delta=4(-3)-2(-6)=0$ et
+        $\Delta_x=10(-3)-7(-6)=12\neq0$ : aucune solution, les deux droites sont
+        \textbf{strictement parallèles} ($4x-6y=10$ et $2x-3y=7$ ont des
+        seconds membres incompatibles pour un même premier membre).
+  \item Partie B, 3) : même système que l'exercice 1 de la séance 2 ;
+        $S=\{(2\,;\,3\,;\,1)\}$. Chaque équation représente un \textbf{plan} de
+        l'espace ; le triplet trouvé est le point d'intersection des trois plans.
+  \item Partie C, 5) : $x+y=20$ et $2\,500x+1\,500y=42\,000$ ; en divisant par
+        $100$ : $25x+15y=420$ ; avec $y=20-x$ : $25x+300-15x=420 \Rightarrow
+        10x=120 \Rightarrow x=12$ ; $y=8$. Soit \textbf{12 romans} et
+        \textbf{8 bandes dessinées}
+        ($2\,500\times12+1\,500\times8=30\,000+12\,000=42\,000$~F).
+\end{enumerate}
+
+\vspace{6pt}
+\noindent{\footnotesize\textit{Fiche générée pour la classe de 1\textsuperscript{re} D ---
+année scolaire 2026--2027. Adapter les consignes et les barèmes au tableau de
+progression de l'établissement.}}
+
+\end{document}
